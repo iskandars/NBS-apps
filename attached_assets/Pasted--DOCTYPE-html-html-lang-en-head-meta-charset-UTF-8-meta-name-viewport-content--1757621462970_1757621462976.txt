@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NBS Monitoring Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🌿 Nature-Based System Dashboard</h1>
+    <p>Monitoring Climate & Social Capital Indicators</p>
+  </header>
+
+  <section id="user-role-banner">
+    <p>Logged in as: <span id="user-role">Supervisor</span></p>
+  </section>
+
+  <!-- RBAC-controlled panels -->
+  <section id="climate-panel" class="rbac-panel" data-role="operator supervisor clientadmin sysadmin">
+    <h2>🌦 Climate Indicators</h2>
+    <select id="layerToggle">
+      <option value="rainfall_layer">Rainfall</option>
+      <option value="temperature_layer">Temperature</option>
+      <option value="vegetation_layer">Vegetation</option>
+    </select>
+    <canvas id="climateChart" width="400" height="200"></canvas>
+    <div id="climateMap" style="height: 300px;"></div>
+  </section>
+
+  <section id="social-capital-panel" class="rbac-panel" data-role="supervisor clientadmin sysadmin">
+    <h2>🤝 Social Capital Metrics</h2>
+    <canvas id="socialChart" width="400" height="200"></canvas>
+    <ul id="communityInsights"></ul>
+  </section>
+
+  <section id="grafana-panel" class="rbac-panel" data-role="clientadmin sysadmin">
+    <h2>📈 Approval Flow Metrics</h2>
+    <iframe src="https://grafana.nbs.local/d/approval-metrics" width="100%" height="400" frameborder="0"></iframe>
+  </section>
+
+  <footer>
+    <p>© 2025 NBS Monitoring | Powered by GeoNode, KoboToolbox, Grafana, and Keycloak</p>
+  </footer>
+
+  <script>
+    // Simulated RBAC token (replace with actual JWT parsing)
+    const userRole = 'supervisor';
+    document.getElementById('user-role').textContent = userRole;
+
+    // RBAC panel visibility
+    document.querySelectorAll('.rbac-panel').forEach(panel => {
+      const allowedRoles = panel.dataset.role.split(' ');
+      if (!allowedRoles.includes(userRole)) {
+        panel.style.display = 'none';
+      }
+    });
+
+    // Climate Chart
+    const climateCtx = document.getElementById('climateChart').getContext('2d');
+    new Chart(climateCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+        datasets: [{
+          label: 'Rainfall (mm)',
+          data: [120, 80, 150, 100],
+          borderColor: 'blue',
+          fill: false
+        }]
+      }
+    });
+
+    // Climate Map with layer toggle
+    const climateMap = L.map('climateMap').setView([-6.5, 106.8], 9);
+    let wmsLayer = L.tileLayer.wms("https://your-geoserver-url/geoserver/wms", {
+      layers: 'nbs:rainfall_layer',
+      format: 'image/png',
+      transparent: true
+    }).addTo(climateMap);
+
+    document.getElementById('layerToggle').addEventListener('change', e => {
+      climateMap.removeLayer(wmsLayer);
+      wmsLayer = L.tileLayer.wms("https://your-geoserver-url/geoserver/wms", {
+        layers: `nbs:${e.target.value}`,
+        format: 'image/png',
+        transparent: true
+      }).addTo(climateMap);
+    });
+
+    // Social Capital Chart
+    const socialCtx = document.getElementById('socialChart').getContext('2d');
+    new Chart(socialCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Trust', 'Participation', 'Collaboration'],
+        datasets: [{
+          label: 'Community Score',
+          data: [3.5, 4.2, 3.8],
+          backgroundColor: ['green', 'orange', 'purple']
+        }]
+      }
+    });
+
+    // Fetch KoboToolbox submissions (mocked)
+    fetch('https://api.kobotoolbox.org/v1/data.json') // Replace with real endpoint
+      .then(res => res.json())
+      .then(data => {
+        const insights = [
+          "Village A: High participation in reforestation",
+          "Village B: Moderate trust in local governance",
+          "Village C: Strong collaboration in water management"
+        ]; // Replace with parsed Kobo data
+        const list = document.getElementById('communityInsights');
+        insights.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          list.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
