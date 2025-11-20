@@ -1,36 +1,20 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bird, Bug, Fish, Flower2, AlertTriangle, TrendingUp } from 'lucide-react';
-
-interface Species {
-  name: string;
-  scientificName: string;
-  count: number;
-  status: 'endangered' | 'vulnerable' | 'stable' | 'thriving';
-  trend: 'up' | 'down' | 'stable';
-  category: 'birds' | 'insects' | 'aquatic' | 'plants';
-}
+import type { Species } from '@shared/schema';
 
 export default function BiodiversityPanel() {
-  //todo: remove mock functionality - replace with real biodiversity monitoring data
   const [selectedCategory, setSelectedCategory] = useState<'birds' | 'insects' | 'aquatic' | 'plants'>('birds');
 
-  const species: Species[] = [
-    { name: 'Javan Hawk-Eagle', scientificName: 'Nisaetus bartelsi', count: 12, status: 'endangered', trend: 'up', category: 'birds' },
-    { name: 'Green Peafowl', scientificName: 'Pavo muticus', count: 28, status: 'vulnerable', trend: 'stable', category: 'birds' },
-    { name: 'Paradise Flycatcher', scientificName: 'Terpsiphone paradisi', count: 45, status: 'stable', trend: 'up', category: 'birds' },
-    { name: 'Wallace\'s Bee', scientificName: 'Megachile pluto', count: 156, status: 'vulnerable', trend: 'down', category: 'insects' },
-    { name: 'Atlas Moth', scientificName: 'Attacus atlas', count: 89, status: 'stable', trend: 'stable', category: 'insects' },
-    { name: 'Freshwater Crayfish', scientificName: 'Cherax quadricarinatus', count: 342, status: 'thriving', trend: 'up', category: 'aquatic' },
-    { name: 'Giant Gourami', scientificName: 'Osphronemus goramy', count: 128, status: 'stable', trend: 'up', category: 'aquatic' },
-    { name: 'Rafflesia', scientificName: 'Rafflesia arnoldii', count: 8, status: 'endangered', trend: 'down', category: 'plants' },
-    { name: 'Titan Arum', scientificName: 'Amorphophallus titanum', count: 15, status: 'vulnerable', trend: 'stable', category: 'plants' }
-  ];
+  const { data: species = [], isLoading } = useQuery<Species[]>({
+    queryKey: ['/api/species'],
+  });
 
-  const filteredSpecies = species.filter(s => s.category === selectedCategory);
+  const filteredSpecies = species.filter((s: Species) => s.category === selectedCategory);
 
   const statusConfig = {
     endangered: { variant: 'destructive' as const, color: 'hsl(var(--destructive))' },
@@ -53,6 +37,10 @@ export default function BiodiversityPanel() {
   const handleSpeciesClick = (species: Species) => {
     console.log(`Species clicked: ${species.name}`);
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-muted-foreground">Loading biodiversity data...</div>;
+  }
 
   return (
     <div className="space-y-6" data-testid="panel-biodiversity">
@@ -114,8 +102,8 @@ export default function BiodiversityPanel() {
             
             <TabsContent value={selectedCategory} className="space-y-4 mt-4">
               {filteredSpecies.map((sp) => {
-                const Icon = categoryIcons[sp.category];
-                const config = statusConfig[sp.status];
+                const Icon = categoryIcons[sp.category as keyof typeof categoryIcons];
+                const config = statusConfig[sp.status as keyof typeof statusConfig];
                 
                 return (
                   <div

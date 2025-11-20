@@ -1,60 +1,26 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Droplets, ThermometerSun, Gauge, FlaskConical, MapPin } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
-
-interface WaterStation {
-  id: string;
-  name: string;
-  location: string;
-  ph: number;
-  turbidity: number;
-  temperature: number;
-  dissolvedOxygen: number;
-  status: 'excellent' | 'good' | 'fair' | 'poor';
-}
+import type { WaterStation } from '@shared/schema';
 
 export default function WaterQualityPanel() {
-  //todo: remove mock functionality - replace with real water quality monitoring API
-  const [selectedStation, setSelectedStation] = useState('station-1');
+  const { data: stations = [], isLoading } = useQuery<WaterStation[]>({
+    queryKey: ['/api/water-stations'],
+  });
 
-  const stations: WaterStation[] = [
-    {
-      id: 'station-1',
-      name: 'Upstream Monitoring Point',
-      location: 'River Basin A, Sector 1',
-      ph: 7.2,
-      turbidity: 12,
-      temperature: 24.5,
-      dissolvedOxygen: 8.2,
-      status: 'excellent'
-    },
-    {
-      id: 'station-2',
-      name: 'Midstream Collection',
-      location: 'River Basin A, Sector 3',
-      ph: 6.8,
-      turbidity: 28,
-      temperature: 25.8,
-      dissolvedOxygen: 6.5,
-      status: 'good'
-    },
-    {
-      id: 'station-3',
-      name: 'Downstream Assessment',
-      location: 'River Basin A, Sector 5',
-      ph: 6.5,
-      turbidity: 45,
-      temperature: 26.2,
-      dissolvedOxygen: 5.1,
-      status: 'fair'
-    }
-  ];
+  const [selectedStation, setSelectedStation] = useState('');
 
-  const currentStation = stations.find(s => s.id === selectedStation) || stations[0];
+  const currentStation = stations.find((s: WaterStation) => s.id === selectedStation) || stations[0];
+  
+  // Auto-select first station when data loads
+  if (stations.length > 0 && !selectedStation) {
+    setSelectedStation(stations[0].id);
+  }
 
   const statusConfig = {
     excellent: { variant: 'default' as const, label: 'Excellent', color: 'hsl(var(--chart-1))' },
@@ -91,6 +57,10 @@ export default function WaterQualityPanel() {
 
   const phStatus = getPhStatus(currentStation.ph);
 
+  if (isLoading || !currentStation) {
+    return <div className="p-6 text-center text-muted-foreground">Loading water quality data...</div>;
+  }
+
   return (
     <div className="space-y-6" data-testid="panel-water-quality">
       <div className="flex items-center justify-between">
@@ -121,8 +91,8 @@ export default function WaterQualityPanel() {
           <Droplets className="h-5 w-5 text-primary" />
           <span className="font-medium">Overall Water Quality:</span>
         </div>
-        <Badge variant={statusConfig[currentStation.status].variant} className="text-sm">
-          {statusConfig[currentStation.status].label}
+        <Badge variant={statusConfig[currentStation.status as keyof typeof statusConfig].variant} className="text-sm">
+          {statusConfig[currentStation.status as keyof typeof statusConfig].label}
         </Badge>
       </div>
 

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -11,77 +12,12 @@ import {
   Circle,
   PlayCircle
 } from 'lucide-react';
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: 'planning' | 'in-progress' | 'completed';
-  progress: number;
-  budget: number;
-  spent: number;
-  team: number;
-  startDate: string;
-  endDate: string;
-  category: 'reforestation' | 'water' | 'biodiversity' | 'community';
-}
+import type { Project } from '@shared/schema';
 
 export default function ProjectsPanel() {
-  //todo: remove mock functionality - replace with real project management system
-  const projects: Project[] = [
-    {
-      id: '1',
-      name: 'Mountain Forest Restoration',
-      description: 'Large-scale reforestation of degraded mountain slopes',
-      status: 'in-progress',
-      progress: 68,
-      budget: 250000,
-      spent: 175000,
-      team: 12,
-      startDate: 'Jan 2024',
-      endDate: 'Dec 2024',
-      category: 'reforestation'
-    },
-    {
-      id: '2',
-      name: 'River Basin Water Quality Initiative',
-      description: 'Comprehensive water monitoring and treatment program',
-      status: 'in-progress',
-      progress: 45,
-      budget: 180000,
-      spent: 95000,
-      team: 8,
-      startDate: 'Mar 2024',
-      endDate: 'Mar 2025',
-      category: 'water'
-    },
-    {
-      id: '3',
-      name: 'Endangered Species Protection',
-      description: 'Habitat preservation for critically endangered species',
-      status: 'planning',
-      progress: 15,
-      budget: 320000,
-      spent: 48000,
-      team: 6,
-      startDate: 'Jun 2024',
-      endDate: 'Dec 2025',
-      category: 'biodiversity'
-    },
-    {
-      id: '4',
-      name: 'Community Education Program',
-      description: 'Environmental awareness and capacity building initiative',
-      status: 'completed',
-      progress: 100,
-      budget: 95000,
-      spent: 92000,
-      team: 5,
-      startDate: 'Sep 2023',
-      endDate: 'May 2024',
-      category: 'community'
-    }
-  ];
+  const { data: projects = [], isLoading } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+  });
 
   const statusConfig = {
     planning: {
@@ -116,6 +52,10 @@ export default function ProjectsPanel() {
   const handleViewDetails = (projectId: string) => {
     console.log(`View details for project: ${projectId}`);
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-muted-foreground">Loading projects...</div>;
+  }
 
   return (
     <div className="space-y-6" data-testid="panel-projects">
@@ -168,7 +108,7 @@ export default function ProjectsPanel() {
         </div>
 
         {projects.map((project) => {
-          const config = statusConfig[project.status];
+          const config = statusConfig[project.status as keyof typeof statusConfig];
           const StatusIcon = config.icon;
           const budgetProgress = (project.spent / project.budget) * 100;
 

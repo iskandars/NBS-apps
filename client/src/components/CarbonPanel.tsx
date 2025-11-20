@@ -1,24 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Leaf, Trees, Sprout, TrendingDown } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
-
-interface CarbonProject {
-  name: string;
-  area: number;
-  captured: number;
-  target: number;
-  type: 'reforestation' | 'wetland' | 'agroforestry';
-}
+import type { CarbonProject } from '@shared/schema';
 
 export default function CarbonPanel() {
-  //todo: remove mock functionality - replace with real carbon monitoring data
-  const projects: CarbonProject[] = [
-    { name: 'Mountain Forest Restoration', area: 450, captured: 3420, target: 4500, type: 'reforestation' },
-    { name: 'Coastal Mangrove Revival', area: 280, captured: 2150, target: 2800, type: 'wetland' },
-    { name: 'Community Agroforestry', area: 320, captured: 1890, target: 3200, type: 'agroforestry' }
-  ];
+  const { data: projects = [], isLoading } = useQuery<CarbonProject[]>({
+    queryKey: ['/api/carbon-projects'],
+  });
 
   const totalCaptured = projects.reduce((sum, p) => sum + p.captured, 0);
   const totalTarget = projects.reduce((sum, p) => sum + p.target, 0);
@@ -46,6 +37,10 @@ export default function CarbonPanel() {
   const handleProjectClick = (project: CarbonProject) => {
     console.log(`Project clicked: ${project.name}`);
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-muted-foreground">Loading carbon data...</div>;
+  }
 
   return (
     <div className="space-y-6" data-testid="panel-carbon">
@@ -114,7 +109,7 @@ export default function CarbonPanel() {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Project Details</h3>
         {projects.map((project) => {
-          const Icon = typeIcons[project.type];
+          const Icon = typeIcons[project.type as keyof typeof typeIcons];
           const progress = (project.captured / project.target) * 100;
           
           return (

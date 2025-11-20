@@ -8,7 +8,6 @@ import {
   insertAlertSchema,
   insertProjectSchema
 } from "@shared/schema";
-import { ZodError } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Biodiversity routes
@@ -30,40 +29,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const species = await storage.createSpecies(data);
       res.status(201).json(species);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid species data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create species" });
+      res.status(400).json({ error: "Invalid species data" });
     }
   });
 
   app.patch("/api/species/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const data = insertSpeciesSchema.partial().parse(req.body);
-      const species = await storage.updateSpecies(id, data);
+      const species = await storage.updateSpecies(id, req.body);
       if (!species) {
         return res.status(404).json({ error: "Species not found" });
       }
       res.json(species);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid species data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update species" });
-    }
-  });
-
-  app.delete("/api/species/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await storage.deleteSpecies(id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Species not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete species" });
+      res.status(400).json({ error: "Failed to update species" });
     }
   });
 
@@ -96,40 +75,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const station = await storage.createWaterStation(data);
       res.status(201).json(station);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid station data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create station" });
+      res.status(400).json({ error: "Invalid station data" });
     }
   });
 
   app.patch("/api/water-stations/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const data = insertWaterStationSchema.partial().parse(req.body);
-      const station = await storage.updateWaterStation(id, data);
+      const station = await storage.updateWaterStation(id, req.body);
       if (!station) {
         return res.status(404).json({ error: "Station not found" });
       }
       res.json(station);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid station data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update station" });
-    }
-  });
-
-  app.delete("/api/water-stations/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await storage.deleteWaterStation(id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Station not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete station" });
+      res.status(400).json({ error: "Failed to update station" });
     }
   });
 
@@ -162,40 +121,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createCarbonProject(data);
       res.status(201).json(project);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid project data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create project" });
+      res.status(400).json({ error: "Invalid project data" });
     }
   });
 
   app.patch("/api/carbon-projects/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const data = insertCarbonProjectSchema.partial().parse(req.body);
-      const project = await storage.updateCarbonProject(id, data);
+      const project = await storage.updateCarbonProject(id, req.body);
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
       res.json(project);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid project data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update project" });
-    }
-  });
-
-  app.delete("/api/carbon-projects/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await storage.deleteCarbonProject(id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Project not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete project" });
+      res.status(400).json({ error: "Failed to update project" });
     }
   });
 
@@ -218,40 +157,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const alert = await storage.createAlert(data);
       res.status(201).json(alert);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid alert data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create alert" });
+      res.status(400).json({ error: "Invalid alert data" });
     }
   });
 
   app.patch("/api/alerts/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const data = insertAlertSchema.partial().parse(req.body);
-      const alert = await storage.updateAlert(id, data);
+      const alert = await storage.updateAlert(id, req.body);
       if (!alert) {
         return res.status(404).json({ error: "Alert not found" });
       }
       res.json(alert);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid alert data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update alert" });
-    }
-  });
-
-  app.delete("/api/alerts/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await storage.deleteAlert(id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Alert not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete alert" });
+      res.status(400).json({ error: "Failed to update alert" });
     }
   });
 
@@ -284,40 +203,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createProject(data);
       res.status(201).json(project);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid project data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create project" });
+      res.status(400).json({ error: "Invalid project data" });
     }
   });
 
   app.patch("/api/projects/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const data = insertProjectSchema.partial().parse(req.body);
-      const project = await storage.updateProject(id, data);
+      const project = await storage.updateProject(id, req.body);
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
       res.json(project);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ error: "Invalid project data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update project" });
-    }
-  });
-
-  app.delete("/api/projects/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deleted = await storage.deleteProject(id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Project not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete project" });
+      res.status(400).json({ error: "Failed to update project" });
     }
   });
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,66 +14,43 @@ import {
   Wind,
   TreePine
 } from 'lucide-react';
-
-interface Alert {
-  id: string;
-  title: string;
-  description: string;
-  severity: 'critical' | 'warning' | 'info';
-  category: 'environment' | 'biodiversity' | 'water' | 'weather';
-  timestamp: string;
-  status: 'active' | 'acknowledged' | 'resolved';
-}
+import type { Alert } from '@shared/schema';
+import { queryClient } from '@/lib/queryClient';
 
 export default function AlertsPanel() {
-  //todo: remove mock functionality - replace with real alert system API
-  const [alerts] = useState<Alert[]>([
-    {
-      id: '1',
-      title: 'High Turbidity Detected',
-      description: 'Water turbidity at Downstream Station exceeds 50 NTU threshold',
-      severity: 'critical',
-      category: 'water',
-      timestamp: '2 hours ago',
-      status: 'active'
+  const { data: alerts = [], isLoading } = useQuery<Alert[]>({
+    queryKey: ['/api/alerts'],
+  });
+
+  const acknowledgeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/alerts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'acknowledged' }),
+      });
+      if (!response.ok) throw new Error('Failed to acknowledge alert');
+      return response.json();
     },
-    {
-      id: '2',
-      title: 'Temperature Spike Warning',
-      description: 'River temperature increased by 3°C in 6 hours',
-      severity: 'warning',
-      category: 'environment',
-      timestamp: '5 hours ago',
-      status: 'acknowledged'
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/alerts'] });
     },
-    {
-      id: '3',
-      title: 'Endangered Species Sighting',
-      description: 'Javan Hawk-Eagle spotted in protected area - positive indicator',
-      severity: 'info',
-      category: 'biodiversity',
-      timestamp: '1 day ago',
-      status: 'resolved'
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/alerts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'resolved' }),
+      });
+      if (!response.ok) throw new Error('Failed to resolve alert');
+      return response.json();
     },
-    {
-      id: '4',
-      title: 'Heavy Rainfall Expected',
-      description: 'Weather forecast indicates 120mm+ rainfall in next 48 hours',
-      severity: 'warning',
-      category: 'weather',
-      timestamp: '3 hours ago',
-      status: 'active'
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/alerts'] });
     },
-    {
-      id: '5',
-      title: 'Dissolved Oxygen Below Minimum',
-      description: 'DO levels at 4.2 mg/L, below safe threshold of 5 mg/L',
-      severity: 'critical',
-      category: 'water',
-      timestamp: '30 minutes ago',
-      status: 'active'
-    }
-  ]);
+  });
 
   const severityConfig = {
     critical: {
@@ -112,17 +89,17 @@ export default function AlertsPanel() {
   };
 
   const handleAcknowledge = (alertId: string) => {
-    console.log(`Alert acknowledged: ${alertId}`);
+    acknowledgeMutation.mutate(alertId);
   };
 
   const handleResolve = (alertId: string) => {
-    console.log(`Alert resolved: ${alertId}`);
+    resolveMutation.mutate(alertId);
   };
 
   const renderAlert = (alert: Alert) => {
-    const config = severityConfig[alert.severity];
+    const config = severityConfig[alert.severity as keyof typeof severityConfig];
     const SeverityIcon = config.icon;
-    const CategoryIcon = categoryIcons[alert.category];
+    const CategoryIcon = categoryIcons[alert.category as keyof typeof categoryIcons];
 
     return (
       <Card
@@ -195,6 +172,10 @@ export default function AlertsPanel() {
       </Card>
     );
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-muted-foreground">Loading alerts...</div>;
+  }
 
   return (
     <div className="space-y-6" data-testid="panel-alerts">
