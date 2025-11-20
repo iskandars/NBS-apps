@@ -23,7 +23,12 @@ import {
   Shield, 
   LogOut,
   Moon,
-  Sun
+  Sun,
+  Bird,
+  Droplets,
+  Leaf,
+  Bell,
+  FolderKanban
 } from 'lucide-react';
 import type { UserRole } from '@shared/schema';
 
@@ -35,10 +40,10 @@ interface AppSidebarProps {
 }
 
 const rolePermissions = {
-  operator: ['climate'],
-  supervisor: ['climate', 'social'],
-  clientadmin: ['climate', 'social', 'grafana'],
-  sysadmin: ['climate', 'social', 'grafana', 'settings']
+  operator: ['climate', 'biodiversity', 'water', 'alerts'],
+  supervisor: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts'],
+  clientadmin: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts', 'grafana', 'projects'],
+  sysadmin: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts', 'grafana', 'projects', 'settings']
 };
 
 const menuItems = [
@@ -47,28 +52,63 @@ const menuItems = [
     title: 'Climate Data',
     url: '/climate',
     icon: TreePine,
-    description: 'Monitor environmental indicators'
+    description: 'Environmental indicators'
+  },
+  {
+    id: 'biodiversity',
+    title: 'Biodiversity',
+    url: '/biodiversity',
+    icon: Bird,
+    description: 'Species monitoring'
+  },
+  {
+    id: 'water',
+    title: 'Water Quality',
+    url: '/water',
+    icon: Droplets,
+    description: 'Water quality tracking'
+  },
+  {
+    id: 'carbon',
+    title: 'Carbon Tracking',
+    url: '/carbon',
+    icon: Leaf,
+    description: 'Carbon sequestration'
   },
   {
     id: 'social',
     title: 'Social Capital',
     url: '/social',
     icon: Users,
-    description: 'Community engagement metrics'
+    description: 'Community metrics'
+  },
+  {
+    id: 'alerts',
+    title: 'Alerts',
+    url: '/alerts',
+    icon: Bell,
+    description: 'Environmental alerts'
+  },
+  {
+    id: 'projects',
+    title: 'Projects',
+    url: '/projects',
+    icon: FolderKanban,
+    description: 'Project management'
   },
   {
     id: 'grafana',
     title: 'Approval Metrics',
     url: '/approvals',
     icon: TrendingUp,
-    description: 'Workflow analytics dashboard'
+    description: 'Workflow analytics'
   },
   {
     id: 'settings',
     title: 'System Settings',
     url: '/settings',
     icon: Settings,
-    description: 'Administrative controls'
+    description: 'Admin controls'
   }
 ];
 

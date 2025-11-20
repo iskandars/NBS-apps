@@ -10,6 +10,11 @@ import AppSidebar from "@/components/AppSidebar";
 import Home from "@/pages/Home";
 import Climate from "@/pages/Climate";
 import Social from "@/pages/Social";
+import Biodiversity from "@/pages/Biodiversity";
+import WaterQuality from "@/pages/WaterQuality";
+import Carbon from "@/pages/Carbon";
+import Alerts from "@/pages/Alerts";
+import Projects from "@/pages/Projects";
 import Approvals from "@/pages/Approvals";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
@@ -21,7 +26,12 @@ function Router({ userRole }: { userRole: UserRole }) {
     <Switch>
       <Route path="/" component={() => <Home userRole={userRole} username="Dr. Sarah Johnson" />} />
       <Route path="/climate" component={Climate} />
+      <Route path="/biodiversity" component={Biodiversity} />
+      <Route path="/water" component={WaterQuality} />
+      <Route path="/carbon" component={Carbon} />
       <Route path="/social" component={Social} />
+      <Route path="/alerts" component={Alerts} />
+      <Route path="/projects" component={Projects} />
       <Route path="/approvals" component={Approvals} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />

@@ -11,10 +11,10 @@ interface DashboardProps {
 }
 
 const rolePermissions = {
-  operator: ['climate'],
-  supervisor: ['climate', 'social'],
-  clientadmin: ['climate', 'social', 'grafana'],
-  sysadmin: ['climate', 'social', 'grafana']
+  operator: ['climate', 'biodiversity', 'water', 'alerts'],
+  supervisor: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts'],
+  clientadmin: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts', 'grafana', 'projects'],
+  sysadmin: ['climate', 'social', 'biodiversity', 'water', 'carbon', 'alerts', 'grafana', 'projects']
 };
 
 export default function Dashboard({ userRole, username }: DashboardProps) {
